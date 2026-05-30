@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NameAdmin | Data Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./assets/phosphor/style.css">
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .explorer-toolbar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    .input-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-field label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .modern-input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-light);
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+      font-family: inherit;
+      width: 220px;
+    }
+
+    .modern-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .data-table-container {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .name-cell {
+      font-family: ui-monospace, monospace;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .btn-icon.danger:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .checkbox-custom {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .checkbox-custom:checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .checkbox-custom:checked::after {
+      content: '✔';
+      position: absolute;
+      color: white;
+      font-size: 12px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-light);
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 8px;
+    }
+  </style>
+</head>
+
+<body class="dashboard-theme">
+  <!-- Glowing background elements -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <nav class="side-nav" aria-label="Sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div class="brand">
+      <div class="logo-icon">
+        <i class="ph ph-hexagon"></i>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">NameAdmin</div>
+        <div class="brand-subtitle">Enterprise Data Hub</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="./sheet.html" data-title="Sheet">
+        <i class="ph ph-table"></i>
+        <span>Sheet</span>
+      </a>
+      <a class="nav-item" href="./index.html" data-title="Bulk Editor">
+        <i class="ph ph-database"></i>
+        <span>Bulk Editor</span>
+      </a>
+      <a class="nav-item active" href="#" aria-current="page" data-title="Data Explorer">
+        <i class="ph ph-folder"></i>
+        <span>Data Explorer</span>
+      </a>
+      <a class="nav-item" href="./analytics.html" data-title="Analytics">
+        <i class="ph ph-chart-line-up"></i>
+        <span>Analytics</span>
+      </a>
+      <a class="nav-item" href="./nametionalize.html" data-title="Nametionalize">
+        <i class="ph ph-globe-hemisphere-west"></i>
+        <span>Nametionalize</span>
+      </a>
+      <a class="nav-item" href="./paycode.html" data-title="PayCode">
+        <i class="ph ph-code"></i>
+        <span>PayCode</span>
+      </a>
+      <a class="nav-item" href="./teachers.html" data-title="Teachers">
+        <i class="ph ph-chalkboard-teacher"></i>
+        <span>Teachers</span>
+      </a>
+      <a class="nav-item" href="./push.html" data-title="PUSH">
+        <i class="ph ph-upload-simple"></i>
+        <span>PUSH</span>
+      </a>
+    </div>
+
+    <div class="nav-footer">
+      <div class="status-indicator">
+        <span class="dot pulse" aria-hidden="true"></span>
+        <span>Secure Local Server</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="workspace">
+    <header class="workspace-header">
+      <div class="header-content">
+        <h1>Data Explorer</h1>
+        <p>Search, filter, edit, and bulk manage your datasets.</p>
+      </div>
+      <div class="header-actions">
+        <button id="bulkDeleteBtn" class="btn btn-secondary text-warning" type="button"
+          style="display: none;">
+          <i class="ph ph-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+        </button>
+      </div>
+    </header>
+
+    <div class="explorer-toolbar glass-card" style="padding: 24px;">
+      <div class="input-field">
+        <label>Category</label>
+        <div class="select-wrapper" style="width: 200px;">
+          <select id="searchCategory" class="modern-select">
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="unisex">Unisex</option>
+          </select>
+          <i class="ph ph-caret-down select-icon"></i>
+        </div>
+      </div>
+
+      <div class="input-field">
+        <label>Search Query</label>
+        <input type="text" id="searchQuery" class="modern-input" placeholder="Partial or exact match..." />
+      </div>
+
+      <div class="input-field">
+        <label>Exact Character Length</label>
+        <input type="number" id="searchLength" class="modern-input" placeholder="e.g. 18" style="width: 140px;" />
+      </div>
+
+      <button id="searchBtn" class="btn btn-primary" type="button" style="height: 42px;">
+        <i class="ph ph-magnifying-glass"></i> Search
+      </button>
+    </div>
+
+    <div id="statusMsg" class="status-msg" style="display: none; margin-bottom: 20px;"></div>
+
+    <div class="data-table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px;"><input type="checkbox" id="selectAll" class="checkbox-custom" /></th>
+            <th>Name String</th>
+            <th style="width: 100px;">Length</th>
+            <th style="width: 120px; text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+          <tr>
+            <td colspan="4" style="text-align:center; color: var(--text-muted); padding: 40px;">Use the controls above
+              to search the dataset.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <span id="pageInfo">Showing 0 results</span>
+        <div class="pagination-controls">
+          <button id="prevPage" class="btn btn-secondary" style="padding: 6px 12px;" disabled><i
+              class="ph ph-caret-left"></i> Prev</button>
+          <button id="nextPage" class="btn btn-secondary" style="padding: 6px 12px;" disabled>Next <i
+              class="ph ph-caret-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./realtime.js"></script>
+  <script src="./explorer.js"></script>
+  <script>
+    if (window.RealTimeSync) {
+        window.RealTimeSync.onDataChange((data) => {
+            const currentCat = document.getElementById("category")?.value;
+            if (data.category === "all" || data.category === currentCat) {
+               console.log("Explorer refreshing due to real-time update in " + data.category);
+               if (typeof performSearch === 'function') performSearch();
+            }
+        });
+    }
+  </script>
+</body>
+
+</html>

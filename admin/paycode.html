@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NameAdmin | PayCode Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./assets/phosphor/style.css">
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .workspace-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* Tab System */
+    .tab-container {
+      margin-bottom: 24px;
+      display: flex;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 6px;
+      border-radius: 14px;
+      width: fit-content;
+      border: 1px solid var(--border-light);
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-base);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn i {
+      font-size: 18px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Resources Sidebar */
+    .resources-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .resource-card {
+      padding: 20px;
+    }
+
+    .resource-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-main);
+    }
+
+    .resource-title i {
+      color: var(--primary);
+    }
+
+    /* Table Enhancements */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .search-wrapper {
+      position: relative;
+      width: 300px;
+    }
+
+    .search-wrapper i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 12px 10px 38px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: var(--transition-base);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .table-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .mini-stat {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-light);
+      padding: 12px 16px;
+      border-radius: 12px;
+      flex: 1;
+    }
+
+    .mini-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .mini-stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Code Grid Adjustment */
+    .code-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .code-card {
+      padding: 16px;
+      gap: 12px;
+    }
+
+  </style>
+</head>
+
+<body class="dashboard-theme">
+  <!-- Glowing background elements -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <nav class="side-nav" aria-label="Sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div class="brand">
+      <div class="logo-icon">
+        <i class="ph ph-hexagon"></i>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">NameAdmin</div>
+        <div class="brand-subtitle">Enterprise Data Hub</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="./sheet.html" data-title="Sheet">
+        <i class="ph ph-table"></i>
+        <span>Sheet</span>
+      </a>
+      <a class="nav-item" href="./index.html" data-title="Bulk Editor">
+        <i class="ph ph-database"></i>
+        <span>Bulk Editor</span>
+      </a>
+      <a class="nav-item" href="./explorer.html" data-title="Data Explorer">
+        <i class="ph ph-folder"></i>
+        <span>Data Explorer</span>
+      </a>
+      <a class="nav-item" href="./analytics.html" data-title="Analytics">
+        <i class="ph ph-chart-line-up"></i>
+        <span>Analytics</span>
+      </a>
+      <a class="nav-item" href="./nametionalize.html" data-title="Nametionalize">
+        <i class="ph ph-globe-hemisphere-west"></i>
+        <span>Nametionalize</span>
+      </a>
+      <a class="nav-item active" href="#" aria-current="page" data-title="PayCode">
+        <i class="ph ph-code"></i>
+        <span>PayCode</span>
+      </a>
+      <a class="nav-item" href="./teachers.html" data-title="Teachers">
+        <i class="ph ph-chalkboard-teacher"></i>
+        <span>Teachers</span>
+      </a>
+      <a class="nav-item" href="./push.html" data-title="PUSH">
+        <i class="ph ph-upload-simple"></i>
+        <span>PUSH</span>
+      </a>
+    </div>
+
+    <div class="nav-footer">
+      <div class="status-indicator">
+        <span class="dot pulse" aria-hidden="true"></span>
+        <span>Secure Local Server</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="workspace">
+    <header class="workspace-header">
+      <div class="header-content">
+        <h1>PayCode Hub</h1>
+        <p>Manage integration codes, API snippets, and data templates.</p>
+      </div>
+    </header>
+
+    <div class="workspace-layout">
+      <div class="main-content">
+        <div class="tab-container">
+          <button class="tab-btn active" data-tab="tab-view">
+            <i class="ph ph-table"></i> View & Edit
+          </button>
+          <button class="tab-btn" data-tab="tab-import">
+            <i class="ph ph-file-arrow-up"></i> Bulk Import
+          </button>
+          <button class="tab-btn" data-tab="tab-match">
+            <i class="ph ph-arrows-merge"></i> Smart Match
+          </button>
+        </div>
+
+        <!-- Tab: View & Edit -->
+        <div id="tab-view" class="tab-content active">
+          <div class="table-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">Total Records</div>
+              <div id="statTotal" class="mini-stat-value">0</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">With PayCodes</div>
+              <div id="statCompleted" class="mini-stat-value">0</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">Pending Codes</div>
+              <div id="statPending" class="mini-stat-value">0</div>
+            </div>
+          </div>
+
+          <div class="data-table-container glass-card" style="margin-top: 0;">
+            <div class="table-controls">
+              <div class="search-wrapper">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" id="tableSearch" class="search-input" placeholder="Search names or codes...">
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button id="addRowBtn" class="btn btn-secondary btn-sm" style="padding: 8px 16px;">
+                  <i class="ph ph-plus"></i> Add Row
+                </button>
+                <button id="clearAllBtn" class="btn btn-secondary btn-sm danger" style="padding: 8px 16px; border-color: rgba(239, 68, 68, 0.2); color: #f87171;">
+                  <i class="ph ph-trash"></i> Clear All
+                </button>
+              </div>
+            </div>
+            <table id="payCodeTable">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th>First Name</th>
+                  <th>Middle Name</th>
+                  <th>Last Name</th>
+                  <th>School Pay Code</th>
+                  <th style="width: 80px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <!-- Rows will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Bulk Import -->
+        <div id="tab-import" class="tab-content">
+          <div class="glass-card tool-card">
+            <div class="tool-card-title"><i class="ph ph-clipboard-text"></i> Bulk Import Interface</div>
+            <p class="tool-desc">Import data from Excel files or paste text to <strong>replace</strong> the entire table content.</p>
+            
+            <!-- Excel Upload Section -->
+            <div style="margin-bottom: 32px; padding: 24px; background: rgba(99, 102, 241, 0.05); border: 2px dashed rgba(99, 102, 241, 0.3); border-radius: 16px;">
+              <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                <i class="ph ph-file-xls" style="font-size: 32px; color: var(--primary);"></i>
+                <div>
+                  <h3 style="margin: 0; font-size: 18px; color: var(--text-main);">Upload Excel File</h3>
+                  <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-muted);">Supported formats: .xlsx, .xls</p>
+                </div>
+              </div>
+              
+              <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display: none;">
+              <button id="uploadExcelBtn" class="btn btn-primary" style="width: auto; margin-right: 12px;">
+                <i class="ph ph-upload-simple"></i> Choose Excel File
+              </button>
+              <button id="clearExcelBtn" class="btn btn-secondary" style="width: auto; display: none;">
+                <i class="ph ph-x"></i> Clear Selection
+              </button>
+              
+              <div id="excelFileInfo" style="margin-top: 12px; font-size: 13px; color: var(--text-muted); display: none;">
+                <i class="ph ph-check-circle" style="color: var(--success);"></i> <span id="fileName"></span>
+              </div>
+              
+              <div id="excelPreviewSection" style="margin-top: 20px; display: none;">
+                <div style="padding: 16px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--border-light);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <strong style="color: var(--text-main); font-size: 14px;">Preview Extracted Data</strong>
+                    <span id="previewCount" style="font-size: 12px; color: var(--text-muted);"></span>
+                  </div>
+                  <div id="excelPreviewTable" style="max-height: 300px; overflow-y: auto; font-size: 12px;">
+                    <!-- Preview will be populated here -->
+                  </div>
+                  <div style="margin-top: 16px; display: flex; gap: 12px;">
+                    <button id="confirmImportBtn" class="btn btn-success" style="flex: 1;">
+                      <i class="ph ph-check"></i> Confirm & Import
+                    </button>
+                    <button id="cancelImportBtn" class="btn btn-secondary" style="flex: 1;">
+                      <i class="ph ph-x"></i> Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="excelErrorSection" style="margin-top: 16px; padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; display: none;">
+                <div style="display: flex; align-items: start; gap: 8px;">
+                  <i class="ph ph-warning-circle" style="color: #f87171; font-size: 18px; margin-top: 2px;"></i>
+                  <div>
+                    <strong style="color: #fca5a5; font-size: 13px;">Import Error</strong>
+                    <p id="errorMessage" style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Divider -->
+            <div style="display: flex; align-items: center; gap: 16px; margin: 24px 0;">
+              <div style="flex: 1; height: 1px; background: var(--border-light);"></div>
+              <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">OR</span>
+              <div style="flex: 1; height: 1px; background: var(--border-light);"></div>
+            </div>
+            
+            <!-- Paste Area Section -->
+            <p class="tool-desc" style="margin-bottom: 16px;">Paste your data below (tab or comma separated):</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 250px; gap: 24px;">
+              <div>
+                <textarea id="pasteArea" class="modern-input" style="width: 100%; height: 300px; font-family: ui-monospace, monospace; font-size: 13px; resize: none;" placeholder="Example: Doe, Jane, Mary, SP-001"></textarea>
+              </div>
+              <div>
+                <div class="input-group" style="margin-bottom: 20px;">
+                  <label>Paste Format</label>
+                  <select id="pasteFormat" class="modern-select" style="height: 44px;">
+                    <option value="last_first">Last, First, [Middle], Code</option>
+                    <option value="first_last">First, [Middle], Last, Code</option>
+                  </select>
+                </div>
+                <div class="tool-actions">
+                  <button id="processPasteBtn" class="btn btn-primary" style="width: 100%;">
+                    <i class="ph ph-magic-wand"></i> Process & Replace
+                  </button>
+                  <button id="clearPasteBtn" class="btn btn-secondary" style="width: 100%;">
+                    <i class="ph ph-x"></i> Clear Input
+                  </button>
+                </div>
+                <div class="help-text" style="margin-top: 20px;">
+                  <strong>Note:</strong> This will clear all existing rows and replace them with the pasted data.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Smart Match -->
+        <div id="tab-match" class="tab-content">
+          <div class="glass-card tool-card">
+            <div class="tool-card-title"><i class="ph ph-arrows-merge"></i> Smart PayCode Matcher</div>
+            <p class="tool-desc">Upload PDF files or paste names and codes to <strong>update</strong> existing rows. We use fuzzy matching to find the right person.</p>
+            
+            <!-- PDF Upload Section -->
+            <div style="margin-bottom: 32px; padding: 24px; background: rgba(218, 147, 93, 0.05); border: 2px dashed rgba(218, 147, 93, 0.3); border-radius: 16px;">
+              <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                <i class="ph ph-file-pdf" style="font-size: 32px; color: var(--accent-orange);"></i>
+                <div>
+                  <h3 style="margin: 0; font-size: 18px; color: var(--text-main);">Upload PDF File</h3>
+                  <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-muted);">Extract Payment Codes and Names automatically</p>
+                </div>
+              </div>
+              
+              <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;">
+              <button id="uploadPdfBtn" class="btn btn-primary" style="width: auto; margin-right: 12px; background: linear-gradient(135deg, var(--accent-orange), #c67c4e);">
+                <i class="ph ph-upload-simple"></i> Choose PDF File
+              </button>
+              <button id="clearPdfBtn" class="btn btn-secondary" style="width: auto; display: none;">
+                <i class="ph ph-x"></i> Clear Selection
+              </button>
+              
+              <div id="pdfFileInfo" style="margin-top: 12px; font-size: 13px; color: var(--text-muted); display: none;">
+                <i class="ph ph-check-circle" style="color: var(--success);"></i> <span id="pdfFileName"></span>
+              </div>
+              
+              <div id="pdfPreviewSection" style="margin-top: 20px; display: none;">
+                <div style="padding: 16px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--border-light);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <strong style="color: var(--text-main); font-size: 14px;">Extracted Data Preview</strong>
+                    <span id="pdfPreviewCount" style="font-size: 12px; color: var(--text-muted);"></span>
+                  </div>
+                  <div id="pdfPreviewTable" style="max-height: 300px; overflow-y: auto; font-size: 12px;">
+                    <!-- Preview will be populated here -->
+                  </div>
+                  <div style="margin-top: 16px; display: flex; gap: 12px;">
+                    <button id="confirmPdfMatchBtn" class="btn btn-success" style="flex: 1;">
+                      <i class="ph ph-check"></i> Confirm & Match
+                    </button>
+                    <button id="cancelPdfBtn" class="btn btn-secondary" style="flex: 1;">
+                      <i class="ph ph-x"></i> Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="pdfErrorSection" style="margin-top: 16px; padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; display: none;">
+                <div style="display: flex; align-items: start; gap: 8px;">
+                  <i class="ph ph-warning-circle" style="color: #f87171; font-size: 18px; margin-top: 2px;"></i>
+                  <div>
+                    <strong style="color: #fca5a5; font-size: 13px;">PDF Processing Error</strong>
+                    <p id="pdfErrorMessage" style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Divider -->
+            <div style="display: flex; align-items: center; gap: 16px; margin: 24px 0;">
+              <div style="flex: 1; height: 1px; background: var(--border-light);"></div>
+              <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">OR PASTE TEXT</span>
+              <div style="flex: 1; height: 1px; background: var(--border-light);"></div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 250px; gap: 24px;">
+              <div>
+                <textarea id="pasteArea2" class="modern-input" style="width: 100%; height: 200px; font-family: ui-monospace, monospace; font-size: 13px; resize: none;" placeholder="Example: John Kakooza 1011091547"></textarea>
+              </div>
+              <div>
+                <div class="input-group" style="margin-bottom: 20px;">
+                  <label>Match Format</label>
+                  <select id="pasteFormat2" class="modern-select" style="height: 44px;">
+                    <option value="last_first">Last, First, [Middle], Code</option>
+                    <option value="first_last">First, [Middle], Last, Code</option>
+                  </select>
+                </div>
+                <div class="tool-actions">
+                  <button id="processPasteBtn2" class="btn btn-primary" style="width: 100%;">
+                    <i class="ph ph-sparkle"></i> Match & Update
+                  </button>
+                  <button id="clearPasteBtn2" class="btn btn-secondary" style="width: 100%;">
+                    <i class="ph ph-x"></i> Clear Input
+                  </button>
+                </div>
+                <div class="help-text" style="margin-top: 20px;">
+                  <strong>Tip:</strong> You can paste multiple rows from Excel. We'll highlight successful matches in the table.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar: Resources -->
+      <aside class="resources-sidebar">
+        <div class="glass-card resource-card">
+          <div class="resource-title"><i class="ph ph-terminal-window"></i> API Integration</div>
+          <p class="code-desc" style="margin-bottom: 12px;">Endpoint for external apps.</p>
+          <div class="code-snippet" style="margin-bottom: 12px; font-size: 11px;">
+            GET /api/names/female
+          </div>
+          <button class="btn btn-secondary btn-sm" style="width: 100%;">View Docs</button>
+        </div>
+
+        <div class="glass-card resource-card">
+          <div class="resource-title"><i class="ph ph-file-csv"></i> Data Templates</div>
+          <p class="code-desc" style="margin-bottom: 16px;">Standardized templates for bulk uploads.</p>
+          <div class="tool-actions">
+            <button id="downloadCsvBtn" class="btn btn-primary btn-sm" style="width: 100%; font-size: 12px;">
+              <i class="ph ph-download-simple"></i> Download Full Template
+            </button>
+            <button id="downloadCsvBtn2" class="btn btn-success btn-sm" style="width: 100%; font-size: 12px; margin-top: 8px;">
+              <i class="ph ph-check-circle"></i> Download Completed
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card resource-card" style="background: rgba(161, 163, 255, 0.05); border-color: rgba(161, 163, 255, 0.2);">
+          <div class="resource-title" style="color: var(--primary);"><i class="ph ph-info"></i> Quick Tips</div>
+          <ul style="font-size: 12px; color: var(--text-muted); padding-left: 16px; line-height: 1.6;">
+            <li>Tab-separated data from Excel works best.</li>
+            <li>Content is auto-saved locally.</li>
+            <li>Double-click any cell to edit.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+  </main>
+
+  <!-- Load XLSX library from CDN for browser use -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- Load PDF.js library for PDF parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <script>
+    // Elements
+    const tableBody = document.getElementById('tableBody');
+    const tableSearch = document.getElementById('tableSearch');
+    const statTotal = document.getElementById('statTotal');
+    const statCompleted = document.getElementById('statCompleted');
+    const statPending = document.getElementById('statPending');
+
+    // --- Tab System ---
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-tab');
+        
+        // Update Buttons
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Update Content
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // --- Table Logic ---
+    function createRow(data = ['', '', '', '']) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td style="color: var(--text-muted);"></td>
+        <td contenteditable="true" class="editable-cell">${data[0] || ''}</td>
+        <td contenteditable="true" class="editable-cell">${data[1] || ''}</td>
+        <td contenteditable="true" class="editable-cell">${data[2] || ''}</td>
+        <td contenteditable="true" class="editable-cell">${data[3] || ''}</td>
+        <td>
+          <button class="btn-icon danger delete-row-btn" title="Delete Row"><i class="ph ph-trash"></i></button>
+        </td>
+      `;
+      
+      // Add event listeners to new cells to update stats on edit
+      row.querySelectorAll('.editable-cell').forEach(cell => {
+        cell.addEventListener('input', updateStats);
+      });
+
+      return row;
+    }
+
+    function updateRowNumbers() {
+      Array.from(tableBody.rows).forEach((row, index) => {
+        row.cells[0].textContent = index + 1;
+      });
+    }
+
+    function updateStats() {
+      const rows = Array.from(tableBody.rows);
+      const total = rows.length;
+      let completed = 0;
+
+      rows.forEach(row => {
+        const payCode = row.cells[4].textContent.trim();
+        if (payCode !== '') completed++;
+      });
+
+      statTotal.textContent = total;
+      statCompleted.textContent = completed;
+      statPending.textContent = total - completed;
+    }
+
+    function attachDeleteEvents() {
+      document.querySelectorAll('.delete-row-btn').forEach(btn => {
+        // Remove existing listener to prevent duplicates
+        btn.replaceWith(btn.cloneNode(true));
+      });
+      
+      document.querySelectorAll('.delete-row-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const row = this.closest('tr');
+          row.style.opacity = '0';
+          row.style.transform = 'translateX(20px)';
+          setTimeout(() => {
+            row.remove();
+            updateRowNumbers();
+            updateStats();
+          }, 300);
+        });
+      });
+    }
+
+    document.getElementById('addRowBtn').addEventListener('click', function() {
+      tableBody.appendChild(createRow());
+      attachDeleteEvents();
+      updateRowNumbers();
+      updateStats();
+    });
+
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear all data from the table?')) {
+        tableBody.innerHTML = '';
+        updateStats();
+      }
+    });
+
+    // --- Search Logic ---
+    tableSearch.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      Array.from(tableBody.rows).forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+      });
+    });
+
+    // Reset search when switching to view tab
+    document.querySelector('[data-tab="tab-view"]').addEventListener('click', () => {
+      tableSearch.value = '';
+      Array.from(tableBody.rows).forEach(row => {
+        row.style.display = '';
+      });
+    });
+
+    // --- Fuzzy Matching Helpers ---
+    function getLevenshteinDistance(a, b) {
+      if (a.length === 0) return b.length;
+      if (b.length === 0) return a.length;
+      const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+      for (let i = 0; i <= a.length; i += 1) matrix[0][i] = i;
+      for (let j = 0; j <= b.length; j += 1) matrix[j][0] = j;
+      for (let j = 1; j <= b.length; j += 1) {
+        for (let i = 1; i <= a.length; i += 1) {
+          const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+          matrix[j][i] = Math.min(
+            matrix[j][i - 1] + 1,
+            matrix[j - 1][i] + 1,
+            matrix[j - 1][i - 1] + indicator
+          );
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
+    function isFuzzyMatch(w1, w2) {
+      if (w1 === w2) return true;
+      if (w1.length > 3 && w2.length > 3) {
+        const distance = getLevenshteinDistance(w1, w2);
+        const maxDistance = Math.max(w1.length, w2.length) > 5 ? 2 : 1;
+        return distance <= maxDistance;
+      }
+      return false;
+    }
+
+    // --- Import Logic ---
+    function handlePaste(areaId, formatId) {
+      const pasteArea = document.getElementById(areaId);
+      const format = document.getElementById(formatId).value;
+      const rawText = pasteArea.value.trim();
+      if (!rawText) {
+        alert('Please paste some data first.');
+        return;
+      }
+
+      const lines = rawText.split(/\r?\n/);
+      let rowsAdded = 0;
+      let errors = 0;
+
+      tableBody.innerHTML = '';
+
+      lines.forEach((line, index) => {
+        if (!line.trim()) return; // Skip empty lines
+        
+        const sep = line.includes('\t') ? '\t' : ',';
+        const parts = line.split(sep).map(p => p.trim()).filter(Boolean);
+        
+        if (parts.length < 2) {
+          errors++;
+          console.warn(`Line ${index + 1} skipped: insufficient data`);
+          return;
+        }
+
+        let payCode = '';
+        const names = [];
+
+        parts.forEach(part => {
+          if (/^\d{10}$/.test(part)) payCode = part;
+          else names.push(part);
+        });
+
+        let mappedData = ['', '', '', payCode];
+
+        if (format === 'last_first') {
+          if (names.length >= 2) {
+            mappedData[0] = names[1];
+            mappedData[2] = names[0];
+          }
+          if (names.length >= 3) mappedData[1] = names[2];
+        } else {
+          if (names.length === 1) mappedData[0] = names[0];
+          else if (names.length === 2) {
+            mappedData[0] = names[0];
+            mappedData[2] = names[1];
+          } else if (names.length >= 3) {
+            mappedData[0] = names[0];
+            mappedData[1] = names[1];
+            mappedData[2] = names[2];
+          }
+        }
+
+        if (names.length > 0 || payCode) {
+          tableBody.appendChild(createRow(mappedData));
+          rowsAdded++;
+        }
+      });
+
+      if (rowsAdded > 0) {
+        attachDeleteEvents();
+        updateRowNumbers();
+        updateStats();
+        pasteArea.value = '';
+        
+        let message = `Successfully imported ${rowsAdded} rows.`;
+        if (errors > 0) {
+          message += ` ${errors} lines were skipped due to insufficient data.`;
+        }
+        alert(message);
+        
+        // Switch to view tab
+        document.querySelector('[data-tab="tab-view"]').click();
+      } else {
+        alert('No valid data found. Please check your format.');
+      }
+    }
+
+    document.getElementById('processPasteBtn').addEventListener('click', () => handlePaste('pasteArea', 'pasteFormat'));
+    document.getElementById('clearPasteBtn').addEventListener('click', () => { document.getElementById('pasteArea').value = ''; });
+
+    // --- Match Logic ---
+    document.getElementById('processPasteBtn2').addEventListener('click', function() {
+      const pasteArea = document.getElementById('pasteArea2');
+      const rawText = pasteArea.value.trim();
+      if (!rawText) {
+        alert('Please paste some data to match.');
+        return;
+      }
+
+      const lines = rawText.split(/\r?\n/);
+      let updatesCount = 0;
+      let unmatchedCount = 0;
+
+      lines.forEach(line => {
+        if (!line.trim()) return; // Skip empty lines
+        
+        const sep = line.includes('\t') ? '\t' : ',';
+        const parts = line.split(sep).map(p => p.trim()).filter(Boolean);
+        
+        let payCode = '';
+        const pastedNames = [];
+        parts.forEach(part => {
+          if (/^\d{10}$/.test(part)) payCode = part;
+          else pastedNames.push(part.toLowerCase());
+        });
+
+        if (!payCode) {
+          console.warn('No valid 10-digit paycode found in line:', line);
+          return;
+        }
+        
+        if (pastedNames.length === 0) {
+          console.warn('No names found in line:', line);
+          return;
+        }
+
+        let lineMatched = false;
+
+        Array.from(tableBody.rows).forEach(row => {
+          const rowNames = [
+            row.cells[1].textContent.trim().toLowerCase(),
+            row.cells[2].textContent.trim().toLowerCase(),
+            row.cells[3].textContent.trim().toLowerCase()
+          ].filter(Boolean);
+
+          const pastedWords = pastedNames.join(' ').split(/\s+/).filter(Boolean);
+          const rowWords = rowNames.join(' ').split(/\s+/).filter(Boolean);
+
+          let matchCount = 0;
+          const rowWordsCopy = [...rowWords];
+          pastedWords.forEach(word => {
+            const idx = rowWordsCopy.findIndex(rw => isFuzzyMatch(word, rw));
+            if (idx !== -1) {
+              matchCount++;
+              rowWordsCopy.splice(idx, 1);
+            }
+          });
+
+          const isMatch = matchCount >= 2 && pastedWords.length > 0 && rowWords.length > 0;
+
+          if (isMatch) {
+            row.cells[4].textContent = payCode;
+            row.style.background = 'rgba(161, 163, 255, 0.15)';
+            row.style.transition = 'background 0.5s';
+            setTimeout(() => { row.style.background = ''; }, 3000);
+            updatesCount++;
+            lineMatched = true;
+          }
+        });
+        
+        if (!lineMatched) {
+          unmatchedCount++;
+        }
+      });
+
+      if (updatesCount > 0) {
+        updateStats();
+        pasteArea.value = '';
+        
+        let message = `Successfully updated ${updatesCount} matching rows!`;
+        if (unmatchedCount > 0) {
+          message += ` ${unmatchedCount} entries had no matches.`;
+        }
+        alert(message);
+        
+        document.querySelector('[data-tab="tab-view"]').click();
+      } else {
+        alert("No matching names were found in the table. Check your spelling or try different names.");
+      }
+    });
+
+    document.getElementById('clearPasteBtn2').addEventListener('click', () => { document.getElementById('pasteArea2').value = ''; });
+
+    // Initialize PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // --- PDF Upload & Extraction Logic ---
+    const pdfFileInput = document.getElementById('pdfFileInput');
+    const uploadPdfBtn = document.getElementById('uploadPdfBtn');
+    const clearPdfBtn = document.getElementById('clearPdfBtn');
+    const pdfFileInfo = document.getElementById('pdfFileInfo');
+    const pdfFileNameSpan = document.getElementById('pdfFileName');
+    const pdfPreviewSection = document.getElementById('pdfPreviewSection');
+    const pdfPreviewTable = document.getElementById('pdfPreviewTable');
+    const pdfPreviewCount = document.getElementById('pdfPreviewCount');
+    const confirmPdfMatchBtn = document.getElementById('confirmPdfMatchBtn');
+    const cancelPdfBtn = document.getElementById('cancelPdfBtn');
+    const pdfErrorSection = document.getElementById('pdfErrorSection');
+    const pdfErrorMessage = document.getElementById('pdfErrorMessage');
+
+    let extractedPdfData = []; // Store extracted data from PDF temporarily
+
+    // Trigger file input when button is clicked
+    uploadPdfBtn.addEventListener('click', () => {
+      pdfFileInput.click();
+    });
+
+    // Handle PDF file selection
+    pdfFileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Validate file type
+      if (!file.type.includes('pdf') && !file.name.endsWith('.pdf')) {
+        showPdfError('Invalid file format. Please upload a PDF file.');
+        return;
+      }
+
+      // Display file info
+      pdfFileNameSpan.textContent = `${file.name} (${formatFileSize(file.size)})`;
+      pdfFileInfo.style.display = 'block';
+      clearPdfBtn.style.display = 'inline-flex';
+      hidePdfError();
+
+      // Show loading state
+      uploadPdfBtn.disabled = true;
+      uploadPdfBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Processing...';
+
+      try {
+        // Read and parse the PDF file
+        await parsePdfFile(file);
+      } catch (error) {
+        console.error('Error processing PDF:', error);
+        showPdfError('Failed to process PDF file. The file may be corrupted or contain no extractable text.');
+      } finally {
+        uploadPdfBtn.disabled = false;
+        uploadPdfBtn.innerHTML = '<i class="ph ph-upload-simple"></i> Choose PDF File';
+      }
+    });
+
+    // Clear selected PDF
+    clearPdfBtn.addEventListener('click', () => {
+      pdfFileInput.value = '';
+      pdfFileInfo.style.display = 'none';
+      clearPdfBtn.style.display = 'none';
+      pdfPreviewSection.style.display = 'none';
+      extractedPdfData = [];
+      hidePdfError();
+    });
+
+    // Cancel PDF import
+    cancelPdfBtn.addEventListener('click', () => {
+      pdfPreviewSection.style.display = 'none';
+      extractedPdfData = [];
+    });
+
+    // Confirm PDF match - update existing table with extracted data
+    confirmPdfMatchBtn.addEventListener('click', () => {
+      if (extractedPdfData.length === 0) {
+        showPdfError('No data extracted from PDF');
+        return;
+      }
+
+      let updatesCount = 0;
+      let unmatchedCount = 0;
+
+      // Match extracted data against existing table rows
+      extractedPdfData.forEach(pdfEntry => {
+        const { firstName, middleName, lastName, payCode } = pdfEntry;
+        
+        if (!payCode) {
+          console.warn('Skipping entry without paycode:', pdfEntry);
+          unmatchedCount++;
+          return;
+        }
+
+        let lineMatched = false;
+        const pastedNames = [firstName, middleName, lastName].filter(Boolean).map(n => n.toLowerCase());
+
+        Array.from(tableBody.rows).forEach(row => {
+          const rowNames = [
+            row.cells[1].textContent.trim().toLowerCase(),
+            row.cells[2].textContent.trim().toLowerCase(),
+            row.cells[3].textContent.trim().toLowerCase()
+          ].filter(Boolean);
+
+          const pastedWords = pastedNames.join(' ').split(/\s+/).filter(Boolean);
+          const rowWords = rowNames.join(' ').split(/\s+/).filter(Boolean);
+
+          let matchCount = 0;
+          const rowWordsCopy = [...rowWords];
+          pastedWords.forEach(word => {
+            const idx = rowWordsCopy.findIndex(rw => isFuzzyMatch(word, rw));
+            if (idx !== -1) {
+              matchCount++;
+              rowWordsCopy.splice(idx, 1);
+            }
+          });
+
+          const isMatch = matchCount >= 2 && pastedWords.length > 0 && rowWords.length > 0;
+
+          if (isMatch) {
+            row.cells[4].textContent = payCode;
+            row.style.background = 'rgba(218, 147, 93, 0.2)';
+            row.style.transition = 'background 0.5s';
+            setTimeout(() => { row.style.background = ''; }, 3000);
+            updatesCount++;
+            lineMatched = true;
+          }
+        });
+        
+        if (!lineMatched) {
+          unmatchedCount++;
+        }
+      });
+
+      if (updatesCount > 0) {
+        updateStats();
+        
+        let message = `Successfully matched and updated ${updatesCount} rows from PDF!`;
+        if (unmatchedCount > 0) {
+          message += ` ${unmatchedCount} entries had no matches.`;
+        }
+        alert(message);
+        
+        document.querySelector('[data-tab="tab-view"]').click();
+      } else {
+        alert("No matching names were found in the table. Check the extracted data or try a different PDF.");
+      }
+
+      // Reset upload UI
+      pdfFileInput.value = '';
+      pdfFileInfo.style.display = 'none';
+      clearPdfBtn.style.display = 'none';
+      pdfPreviewSection.style.display = 'none';
+      extractedPdfData = [];
+    });
+
+    /**
+     * Parse PDF file and extract Payment Codes and Names
+     * @param {File} file - The uploaded PDF file
+     */
+    async function parsePdfFile(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      let fullText = '';
+      
+      // Extract text from all pages
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + '\n';
+      }
+
+      console.log('Extracted PDF text:', fullText.substring(0, 500)); // Debug: show first 500 chars
+
+      // Parse the extracted text to find payment codes and names
+      extractedPdfData = extractPayCodesAndNames(fullText);
+
+      if (extractedPdfData.length === 0) {
+        showPdfError('No payment codes or names found in the PDF. Please check the file content.');
+        return;
+      }
+
+      // Display preview
+      displayPdfPreview(extractedPdfData);
+    }
+
+    /**
+     * Extract payment codes and names from PDF text
+     * Uses multiple patterns to detect common formats
+     * @param {string} text - Full text extracted from PDF
+     * @returns {Array} Array of objects with firstName, middleName, lastName, payCode
+     */
+    function extractPayCodesAndNames(text) {
+      const results = [];
+      const lines = text.split('\n').filter(line => line.trim());
+
+      // Pattern 1: Look for 10-digit numbers (payment codes)
+      const payCodePattern = /\b(\d{10})\b/g;
+      
+      lines.forEach((line, index) => {
+        // Find all payment codes in the line
+        let match;
+        while ((match = payCodePattern.exec(line)) !== null) {
+          const payCode = match[1];
+          
+          // Get surrounding context (words before and after the code)
+          const beforeCode = line.substring(0, match.index).trim();
+          const afterCode = line.substring(match.index + match[0].length).trim();
+          
+          // Try to extract names from the context
+          const names = extractNamesFromContext(beforeCode, afterCode, line);
+          
+          if (names && names.length > 0) {
+            results.push({
+              firstName: names[0] || '',
+              middleName: names[1] || '',
+              lastName: names[2] || '',
+              payCode: payCode
+            });
+          }
+        }
+      });
+
+      // If no results from line-by-line parsing, try broader patterns
+      if (results.length === 0) {
+        // Pattern 2: Look for "Name ... Code" patterns
+        const nameCodePattern = /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\s+(?:Pay\s*Code|Code|Payment)\s*[:#]?\s*(\d{10})/gi;
+        let match;
+        while ((match = nameCodePattern.exec(text)) !== null) {
+          const fullName = match[1].trim();
+          const payCode = match[2];
+          const nameParts = fullName.split(/\s+/);
+          
+          results.push({
+            firstName: nameParts[0] || '',
+            middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : (nameParts.length === 2 ? '' : ''),
+            lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : '',
+            payCode: payCode
+          });
+        }
+      }
+
+      // Pattern 3: Tabular data detection (common in PDFs)
+      if (results.length === 0) {
+        // Look for lines with both names and codes separated by spaces/tabs
+        const tabularPattern = /([A-Z][a-z]+)\s+([A-Z][a-z]+)\s+(?:([A-Z][a-z]+)\s+)?(\d{10})/g;
+        let match;
+        while ((match = tabularPattern.exec(text)) !== null) {
+          results.push({
+            firstName: match[1],
+            middleName: match[3] || '',
+            lastName: match[2],
+            payCode: match[4]
+          });
+        }
+      }
+
+      console.log(`Extracted ${results.length} entries from PDF`);
+      return results;
+    }
+
+    /**
+     * Extract names from text context around a payment code
+     * @param {string} beforeCode - Text before the payment code
+     * @param {string} afterCode - Text after the payment code
+     * @param {string} fullLine - Complete line containing the code
+     * @returns {Array|null} Array of [firstName, middleName, lastName] or null
+     */
+    function extractNamesFromContext(beforeCode, afterCode, fullLine) {
+      // Combine before and after for better context
+      const context = `${beforeCode} ${afterCode}`.trim();
+      
+      // Pattern: Look for capitalized words (potential names)
+      const namePattern = /\b([A-Z][a-z]{2,})\b/g;
+      const potentialNames = [];
+      let match;
+      
+      while ((match = namePattern.exec(context)) !== null) {
+        // Filter out common non-name words
+        const word = match[1];
+        const excludeWords = ['The', 'And', 'For', 'Not', 'But', 'Pay', 'Code', 'Total', 'Date', 'Page', 'School'];
+        if (!excludeWords.includes(word)) {
+          potentialNames.push(word);
+        }
+      }
+
+      // Also check the full line for more context
+      if (potentialNames.length < 2) {
+        const lineMatches = fullLine.match(namePattern);
+        if (lineMatches) {
+          lineMatches.forEach(word => {
+            const excludeWords = ['The', 'And', 'For', 'Not', 'But', 'Pay', 'Code', 'Total', 'Date', 'Page', 'School'];
+            if (!excludeWords.includes(word) && !potentialNames.includes(word)) {
+              potentialNames.push(word);
+            }
+          });
+        }
+      }
+
+      // Return names if we found at least 2 (first and last)
+      if (potentialNames.length >= 2) {
+        // Assume first two are first and last, rest is middle
+        return [
+          potentialNames[0],
+          potentialNames.length > 2 ? potentialNames.slice(1, -1).join(' ') : '',
+          potentialNames[potentialNames.length - 1]
+        ];
+      }
+
+      return null;
+    }
+
+    /**
+     * Display preview of extracted PDF data
+     * @param {Array} data - Extracted data array
+     */
+    function displayPdfPreview(data) {
+      pdfPreviewCount.textContent = `${data.length} entries extracted`;
+
+      // Create preview table HTML
+      let html = `
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border-light);">
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">#</th>
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">First Name</th>
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">Middle Name</th>
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">Last Name</th>
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">Pay Code</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      // Show first 50 rows in preview
+      const previewLimit = Math.min(data.length, 50);
+      for (let i = 0; i < previewLimit; i++) {
+        const entry = data[i];
+        html += `
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 6px 8px; color: var(--text-muted);">${i + 1}</td>
+            <td style="padding: 6px 8px;">${entry.firstName || '-'}</td>
+            <td style="padding: 6px 8px;">${entry.middleName || '-'}</td>
+            <td style="padding: 6px 8px;">${entry.lastName || '-'}</td>
+            <td style="padding: 6px 8px; font-family: monospace; color: var(--accent-orange);">${entry.payCode || '-'}</td>
+          </tr>
+        `;
+      }
+
+      html += '</tbody></table>';
+
+      if (data.length > 50) {
+        html += `<p style="margin-top: 12px; font-size: 11px; color: var(--text-muted); text-align: center;">Showing first 50 of ${data.length} entries</p>`;
+      }
+
+      pdfPreviewTable.innerHTML = html;
+      pdfPreviewSection.style.display = 'block';
+    }
+
+    /**
+     * Show PDF error message
+     * @param {string} message - Error message to display
+     */
+    function showPdfError(message) {
+      pdfErrorMessage.textContent = message;
+      pdfErrorSection.style.display = 'block';
+      pdfPreviewSection.style.display = 'none';
+    }
+
+    /**
+     * Hide PDF error message
+     */
+    function hidePdfError() {
+      pdfErrorSection.style.display = 'none';
+    }
+
+    // --- Excel Upload & Parsing Logic ---
+    const excelFileInput = document.getElementById('excelFileInput');
+    const uploadExcelBtn = document.getElementById('uploadExcelBtn');
+    const clearExcelBtn = document.getElementById('clearExcelBtn');
+    const excelFileInfo = document.getElementById('excelFileInfo');
+    const fileNameSpan = document.getElementById('fileName');
+    const excelPreviewSection = document.getElementById('excelPreviewSection');
+    const excelPreviewTable = document.getElementById('excelPreviewTable');
+    const previewCount = document.getElementById('previewCount');
+    const confirmImportBtn = document.getElementById('confirmImportBtn');
+    const cancelImportBtn = document.getElementById('cancelImportBtn');
+    const excelErrorSection = document.getElementById('excelErrorSection');
+    const errorMessage = document.getElementById('errorMessage');
+
+    let extractedData = []; // Store extracted data temporarily
+
+    // Trigger file input when button is clicked
+    uploadExcelBtn.addEventListener('click', () => {
+      excelFileInput.click();
+    });
+
+    // Handle file selection
+    excelFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Validate file type
+      const validTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+        'application/vnd.ms-excel' // .xls
+      ];
+      
+      if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+        showError('Invalid file format. Please upload an Excel file (.xlsx or .xls)');
+        return;
+      }
+
+      // Display file info
+      fileNameSpan.textContent = `${file.name} (${formatFileSize(file.size)})`;
+      excelFileInfo.style.display = 'block';
+      clearExcelBtn.style.display = 'inline-flex';
+      hideError();
+
+      // Read and parse the Excel file
+      parseExcelFile(file);
+    });
+
+    // Clear selected file
+    clearExcelBtn.addEventListener('click', () => {
+      excelFileInput.value = '';
+      excelFileInfo.style.display = 'none';
+      clearExcelBtn.style.display = 'none';
+      excelPreviewSection.style.display = 'none';
+      extractedData = [];
+      hideError();
+    });
+
+    // Cancel import
+    cancelImportBtn.addEventListener('click', () => {
+      excelPreviewSection.style.display = 'none';
+      extractedData = [];
+    });
+
+    // Confirm import - replace table with extracted data
+    confirmImportBtn.addEventListener('click', () => {
+      if (extractedData.length === 0) {
+        showError('No data to import');
+        return;
+      }
+
+      // Clear existing table
+      tableBody.innerHTML = '';
+
+      // Add extracted rows to table
+      extractedData.forEach(rowData => {
+        tableBody.appendChild(createRow(rowData));
+      });
+
+      attachDeleteEvents();
+      updateRowNumbers();
+      updateStats();
+
+      // Show success message and switch to view tab
+      alert(`Successfully imported ${extractedData.length} rows from Excel file!`);
+      document.querySelector('[data-tab="tab-view"]').click();
+
+      // Reset upload UI
+      excelFileInput.value = '';
+      excelFileInfo.style.display = 'none';
+      clearExcelBtn.style.display = 'none';
+      excelPreviewSection.style.display = 'none';
+      extractedData = [];
+    });
+
+    /**
+     * Parse Excel file and extract First Name, Last Name, Middle Name, and School Pay Code
+     * @param {File} file - The uploaded Excel file
+     */
+    function parseExcelFile(file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+
+          // Get the first sheet
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+
+          // Convert to JSON with headers
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          if (jsonData.length === 0) {
+            showError('Excel file is empty');
+            return;
+          }
+
+          // Extract column indices by matching header names
+          const headers = jsonData[0].map(h => String(h).trim().toLowerCase());
+          
+          // Map possible column name variations
+          const firstNameIdx = findColumnIndex(headers, ['first name', 'firstname', 'first_name', 'fname']);
+          const lastNameIdx = findColumnIndex(headers, ['last name', 'lastname', 'last_name', 'lname', 'surname']);
+          const middleNameIdx = findColumnIndex(headers, ['middle name', 'middlename', 'middle_name', 'mname', 'middle initial']);
+          const payCodeIdx = findColumnIndex(headers, ['school pay code', 'paycode', 'pay_code', 'pay code', 'code']);
+
+          // Validate that we found at least first and last name columns
+          if (firstNameIdx === -1 || lastNameIdx === -1) {
+            showError('Could not find required columns (First Name, Last Name). Please ensure your Excel file has these columns.');
+            return;
+          }
+
+          // Extract data rows (skip header row)
+          extractedData = [];
+          let skippedRows = 0;
+
+          for (let i = 1; i < jsonData.length; i++) {
+            const row = jsonData[i];
+            
+            // Skip completely empty rows
+            if (!row || row.every(cell => !cell || String(cell).trim() === '')) {
+              continue;
+            }
+
+            const firstName = getValueAtIndex(row, firstNameIdx);
+            const lastName = getValueAtIndex(row, lastNameIdx);
+            const middleName = middleNameIdx !== -1 ? getValueAtIndex(row, middleNameIdx) : '';
+            const payCode = payCodeIdx !== -1 ? getValueAtIndex(row, payCodeIdx) : '';
+
+            // Only add rows that have at least a first or last name
+            if (firstName || lastName) {
+              extractedData.push([firstName, middleName, lastName, payCode]);
+            } else {
+              skippedRows++;
+            }
+          }
+
+          if (extractedData.length === 0) {
+            showError('No valid data found in the Excel file');
+            return;
+          }
+
+          // Display preview
+          displayPreview(extractedData, skippedRows);
+
+        } catch (error) {
+          console.error('Error parsing Excel file:', error);
+          showError('Failed to parse Excel file. The file may be corrupted or in an unsupported format.');
+        }
+      };
+
+      reader.onerror = () => {
+        showError('Failed to read the file');
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    /**
+     * Find column index by trying multiple possible column names
+     * @param {Array} headers - Array of header strings
+     * @param {Array} possibleNames - Array of possible column name variations
+     * @returns {number} Column index or -1 if not found
+     */
+    function findColumnIndex(headers, possibleNames) {
+      for (let i = 0; i < headers.length; i++) {
+        const header = headers[i];
+        if (possibleNames.some(name => header === name)) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    /**
+     * Safely get value at index, handling undefined/null
+     * @param {Array} row - Data row
+     * @param {number} index - Column index
+     * @returns {string} Cell value or empty string
+     */
+    function getValueAtIndex(row, index) {
+      if (index === -1 || index >= row.length) return '';
+      const value = row[index];
+      return value ? String(value).trim() : '';
+    }
+
+    /**
+     * Display preview of extracted data
+     * @param {Array} data - Extracted data array
+     * @param {number} skippedRows - Number of skipped rows
+     */
+    function displayPreview(data, skippedRows) {
+      previewCount.textContent = `${data.length} rows extracted${skippedRows > 0 ? ` (${skippedRows} skipped)` : ''}`;
+
+      // Create preview table HTML
+      let html = `
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border-light);">
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">#</th>
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">First Name</th>
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">Middle Name</th>
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">Last Name</th>
+              <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 11px;">Pay Code</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      // Show first 50 rows in preview
+      const previewLimit = Math.min(data.length, 50);
+      for (let i = 0; i < previewLimit; i++) {
+        const row = data[i];
+        html += `
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 6px 8px; color: var(--text-muted);">${i + 1}</td>
+            <td style="padding: 6px 8px;">${row[0] || '-'}</td>
+            <td style="padding: 6px 8px;">${row[1] || '-'}</td>
+            <td style="padding: 6px 8px;">${row[2] || '-'}</td>
+            <td style="padding: 6px 8px; font-family: monospace;">${row[3] || '-'}</td>
+          </tr>
+        `;
+      }
+
+      html += '</tbody></table>';
+
+      if (data.length > 50) {
+        html += `<p style="margin-top: 12px; font-size: 11px; color: var(--text-muted); text-align: center;">Showing first 50 of ${data.length} rows</p>`;
+      }
+
+      excelPreviewTable.innerHTML = html;
+      excelPreviewSection.style.display = 'block';
+    }
+
+    /**
+     * Show error message
+     * @param {string} message - Error message to display
+     */
+    function showError(message) {
+      errorMessage.textContent = message;
+      excelErrorSection.style.display = 'block';
+      excelPreviewSection.style.display = 'none';
+    }
+
+    /**
+     * Hide error message
+     */
+    function hideError() {
+      excelErrorSection.style.display = 'none';
+    }
+
+    /**
+     * Format file size in human-readable format
+     * @param {number} bytes - File size in bytes
+     * @returns {string} Formatted file size
+     */
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    // --- CSV Export ---
+    function exportToCsv(completedOnly = false) {
+      const headers = ['first_name', 'middle_name', 'last_name', 'school_pay_code'];
+      let csvContent = headers.join(',') + '\n';
+      const rows = Array.from(tableBody.rows);
+      let count = 0;
+
+      rows.forEach(row => {
+        const code = row.cells[4].textContent.trim();
+        if (completedOnly && code === '') return;
+
+        const rowData = [
+          row.cells[1].textContent.trim(),
+          row.cells[2].textContent.trim(),
+          row.cells[3].textContent.trim(),
+          code
+        ];
+        const escapedData = rowData.map(val => `"${val.replace(/"/g, '""')}"`);
+        csvContent += escapedData.join(',') + '\n';
+        count++;
+      });
+
+      if (count === 0) {
+        alert("No data to export.");
+        return;
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', completedOnly ? 'paycode_completed.csv' : 'paycode_all.csv');
+      link.click();
+    }
+
+    document.getElementById('downloadCsvBtn').addEventListener('click', () => exportToCsv(false));
+    document.getElementById('downloadCsvBtn2').addEventListener('click', () => exportToCsv(true));
+
+    // Initialize
+    updateStats();
+    attachDeleteEvents();
+
+    // Sidebar Toggle Functionality
+    const sidebarToggleEl = document.getElementById('sidebarToggle');
+    if (sidebarToggleEl) {
+      const sideNav = document.querySelector('.side-nav');
+      
+      // Check localStorage for saved state
+      const savedState = localStorage.getItem('sidebarCollapsed');
+      if (savedState === 'true') {
+        sideNav.classList.add('collapsed');
+      }
+      
+      sidebarToggleEl.addEventListener('click', () => {
+        sideNav.classList.toggle('collapsed');
+        const isCollapsed = sideNav.classList.contains('collapsed');
+        localStorage.setItem('sidebarCollapsed', isCollapsed);
+      });
+    }
+  </script>
+
+</body>
+
+</html>

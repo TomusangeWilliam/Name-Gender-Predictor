@@ -1,0 +1,15 @@
+# Netlify configuration for this repo
+# Edit `command` and `publish` to match your project's build output.
+
+[build]
+# This project doesn't have a top-level `build` script; deploy the static
+# admin UI instead. Remove or change `command` if you add a build step.
+  command = "echo 'No build step'"
+  publish = "admin"
+  functions = "netlify/functions"
+
+# Example: if your app is a static Next.js export, set publish = "out"
+# Example: if you use a custom server, you may need to adapt build/start commands
+
+[dev]
+  command = "npm run start"

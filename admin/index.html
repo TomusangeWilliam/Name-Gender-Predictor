@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NameAdmin | Professional Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./assets/phosphor/style.css">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="dashboard-theme">
+  <!-- Glowing background elements -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <nav class="side-nav" aria-label="Sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div class="brand">
+      <div class="logo-icon">
+        <i class="ph ph-hexagon"></i>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">NameAdmin</div>
+        <div class="brand-subtitle">Enterprise Data Hub</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="./sheet.html" data-title="Sheet">
+        <i class="ph ph-table"></i>
+        <span>Sheet</span>
+      </a>
+      <a class="nav-item active" href="#" aria-current="page" data-title="Bulk Editor">
+        <i class="ph ph-database"></i>
+        <span>Bulk Editor</span>
+      </a>
+      <a class="nav-item" href="./explorer.html" data-title="Data Explorer">
+        <i class="ph ph-folder"></i>
+        <span>Data Explorer</span>
+      </a>
+      <a class="nav-item" href="./analytics.html" data-title="Analytics">
+        <i class="ph ph-chart-line-up"></i>
+        <span>Analytics</span>
+      </a>
+      <a class="nav-item" href="./nametionalize.html" data-title="Nametionalize">
+        <i class="ph ph-globe-hemisphere-west"></i>
+        <span>Nametionalize</span>
+      </a>
+      <a class="nav-item" href="./paycode.html" data-title="PayCode">
+        <i class="ph ph-code"></i>
+        <span>PayCode</span>
+      </a>
+      <a class="nav-item" href="./teachers.html" data-title="Teachers">
+        <i class="ph ph-chalkboard-teacher"></i>
+        <span>Teachers</span>
+      </a>
+      <a class="nav-item" href="./push.html" data-title="PUSH">
+        <i class="ph ph-upload-simple"></i>
+        <span>PUSH</span>
+      </a>
+    </div>
+
+    <div class="nav-footer">
+      <div class="status-indicator">
+        <span class="dot pulse" aria-hidden="true"></span>
+        <span>Secure Local Server</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="workspace">
+    <header class="workspace-header">
+      <div class="header-content">
+        <h1>Name List Editor</h1>
+        <p>Manage, refine, and compile master datasets with ease.</p>
+      </div>
+      <div class="header-actions">
+        <button id="refreshOverview" class="btn btn-secondary" type="button">
+          <i class="ph ph-arrows-clockwise"></i> Sync Database
+        </button>
+      </div>
+    </header>
+
+    <section class="stats-grid" aria-label="Dataset overview">
+      <div class="stat-card">
+        <div class="stat-icon female"><i class="ph ph-gender-female"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Female Records</span>
+          <div id="overviewFemale" class="stat-value">—</div>
+          <div class="stat-meta">female-names.json</div>
+          <div id="updateFemale" class="stat-last-update">Last update: —</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon male"><i class="ph ph-gender-male"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Male Records</span>
+          <div id="overviewMale" class="stat-value">—</div>
+          <div class="stat-meta">male-names.json</div>
+          <div id="updateMale" class="stat-last-update">Last update: —</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon unisex"><i class="ph ph-gender-neuter"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Unisex Records</span>
+          <div id="overviewUnisex" class="stat-value">—</div>
+          <div class="stat-meta">unisex-names.json</div>
+          <div id="updateUnisex" class="stat-last-update">Last update: —</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="editor-container">
+      <div class="editor-card glass-card">
+        <div class="card-header">
+          <div class="input-group">
+            <label for="category">Target Dataset Pipeline</label>
+            <div class="select-wrapper">
+              <select id="category" class="modern-select">
+                <option value="female">Female Category</option>
+                <option value="male">Male Category</option>
+                <option value="unisex">Unisex Category</option>
+              </select>
+              <i class="ph ph-caret-down select-icon"></i>
+            </div>
+            <div class="help-text">
+              Accepts plain text, CSV, or raw JSON snippets. Pipeline automatically forces <strong>Proper Case</strong>.
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button id="clear" class="btn btn-ghost" type="button">
+              <i class="ph ph-trash"></i> Clear
+            </button>
+            <button id="save" class="btn btn-primary" type="button">
+              <i class="ph ph-floppy-disk"></i> Commit Data
+            </button>
+          </div>
+        </div>
+
+        <div class="editor-body">
+          <textarea id="names"
+            placeholder="Paste your dataset here...&#10;&#10;e.g.,&#10;&quot;Aacha&quot;,&#10;&quot;Adooli&quot;,&#10;&quot;Agoe&quot;"
+            spellcheck="false"></textarea>
+
+          <div class="editor-footer">
+            <div id="result" class="status-msg" aria-live="polite">
+              <i class="ph ph-info"></i> Ready for input.
+            </div>
+            <div class="format-chips" aria-label="Accepted formats">
+              <div class="chip">TXT</div>
+              <div class="chip">CSV</div>
+              <button id="jsonChip" class="chip-button" type="button">
+                <i class="ph ph-file-code"></i> Upload JSON
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="quick-tools" aria-label="Utility desk">
+        <div class="glass-card tool-card highlight-card">
+          <div class="tool-card-title">
+            <i class="ph ph-sparkle"></i> Data Cleansing
+          </div>
+          <p class="tool-desc">Ensure dataset integrity using automated deduplication algorithms.</p>
+          <div class="tool-actions">
+            <button id="loadStats" class="btn btn-tool" type="button">
+              <i class="ph ph-chart-bar"></i> Audit Dataset
+            </button>
+            <button id="dedupe" class="btn btn-tool danger" type="button">
+              <i class="ph ph-magic-wand"></i> Remove Duplicates
+            </button>
+            <button id="cleanUnisex" class="btn btn-tool unisex-clean" type="button">
+              <i class="ph ph-gender-neuter"></i> Clean Unisex Names
+            </button>
+          </div>
+          <div id="stats" class="tool-stats">
+            Awaiting audit...
+          </div>
+        </div>
+
+        <!-- Bulk Operations Queue -->
+        <div class="glass-card tool-card bulk-operations-card">
+          <div class="tool-card-title">
+            <i class="ph ph-stack"></i> Bulk Operations
+          </div>
+          <p class="tool-desc">Queue and execute operations across multiple datasets simultaneously.</p>
+          
+          <div class="bulk-category-selector">
+            <label class="bulk-label">Select Categories:</label>
+            <div class="category-checkboxes">
+              <label class="category-checkbox">
+                <input type="checkbox" id="bulkFemale" value="female" />
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-label">Female</span>
+              </label>
+              <label class="category-checkbox">
+                <input type="checkbox" id="bulkMale" value="male" />
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-label">Male</span>
+              </label>
+              <label class="category-checkbox">
+                <input type="checkbox" id="bulkUnisex" value="unisex" />
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-label">Unisex</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="bulk-actions">
+            <button id="bulkDedupe" class="btn btn-bulk danger" type="button" disabled>
+              <i class="ph ph-magic-wand"></i> Dedupe Selected
+            </button>
+            <button id="bulkAudit" class="btn btn-bulk" type="button" disabled>
+              <i class="ph ph-chart-bar"></i> Audit All
+            </button>
+          </div>
+
+          <div id="operationQueue" class="operation-queue" style="display: none;">
+            <div class="queue-header">
+              <i class="ph ph-list-dashes"></i>
+              <span>Operation Queue</span>
+              <span id="queueCount" class="queue-badge">0</span>
+            </div>
+            <div id="queueList" class="queue-list"></div>
+            <div class="queue-progress">
+              <div class="progress-bar">
+                <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+              </div>
+              <div class="progress-text">
+                <span id="progressStatus">Ready</span>
+                <span id="progressPercent">0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card tool-card">
+          <div class="tool-card-title">
+            <i class="ph ph-cable-car"></i> API Endpoints
+          </div>
+          <div class="api-endpoints">
+            <div class="info-box">
+              <span class="method post">POST</span>
+              <code>/api/names/:category</code>
+            </div>
+            <div class="info-box">
+              <span class="method get">GET</span>
+              <code>/api/names/:category/stats</code>
+            </div>
+            <div class="info-box">
+              <span class="method get">GET</span>
+              <code>/api/stats</code>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <input id="jsonFileInput" class="hidden-file-input" type="file" accept="application/json" />
+  <script src="./app.js?v=2"></script>
+</body>
+
+</html>

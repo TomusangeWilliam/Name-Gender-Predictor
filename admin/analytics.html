@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NameAdmin | Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./assets/phosphor/style.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .chart-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      height: 400px;
+    }
+
+    .chart-container {
+      flex: 1;
+      position: relative;
+      min-height: 0;
+      margin-top: 16px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+      height: 450px;
+    }
+
+    .longest-names-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .name-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .name-list li {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      font-family: ui-monospace, monospace;
+      font-size: 13px;
+    }
+
+    .name-list li .len {
+      float: right;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+  </style>
+</head>
+
+<body class="dashboard-theme">
+  <!-- Glowing background elements -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <nav class="side-nav" aria-label="Sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div class="brand">
+      <div class="logo-icon">
+        <i class="ph ph-hexagon"></i>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">NameAdmin</div>
+        <div class="brand-subtitle">Enterprise Data Hub</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="./sheet.html" data-title="Sheet">
+        <i class="ph ph-table"></i>
+        <span>Sheet</span>
+      </a>
+      <a class="nav-item" href="./index.html" data-title="Bulk Editor">
+        <i class="ph ph-database"></i>
+        <span>Bulk Editor</span>
+      </a>
+      <a class="nav-item" href="./explorer.html" data-title="Data Explorer">
+        <i class="ph ph-folder"></i>
+        <span>Data Explorer</span>
+      </a>
+      <a class="nav-item active" href="#" aria-current="page" data-title="Analytics">
+        <i class="ph ph-chart-line-up"></i>
+        <span>Analytics</span>
+      </a>
+      <a class="nav-item" href="./nametionalize.html" data-title="Nametionalize">
+        <i class="ph ph-globe-hemisphere-west"></i>
+        <span>Nametionalize</span>
+      </a>
+      <a class="nav-item" href="./paycode.html" data-title="PayCode">
+        <i class="ph ph-code"></i>
+        <span>PayCode</span>
+      </a>
+      <a class="nav-item" href="./teachers.html" data-title="Teachers">
+        <i class="ph ph-chalkboard-teacher"></i>
+        <span>Teachers</span>
+      </a>
+      <a class="nav-item" href="./push.html" data-title="PUSH">
+        <i class="ph ph-upload-simple"></i>
+        <span>PUSH</span>
+      </a>
+    </div>
+
+    <div class="nav-footer">
+      <div class="status-indicator">
+        <span class="dot pulse" aria-hidden="true"></span>
+        <span>Secure Local Server</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="workspace">
+    <header class="workspace-header">
+      <div class="header-content">
+        <h1>Analytics & Insights</h1>
+        <p>Comprehensive data visualizations for your master datasets.</p>
+      </div>
+    </header>
+
+    <div id="loading" class="status-msg"><i class="ph ph-spinner-gap pulse" style="animation-duration:1s"></i> Compiling
+      Analytics Data...</div>
+
+    <div id="analytics-content" style="display:none;">
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon bg-primary-soft text-primary"><i class="ph ph-database"></i></div>
+          <div class="stat-info">
+            <span class="stat-label">Total Records</span>
+            <div id="totalOverall" class="stat-value">—</div>
+            <div class="stat-meta">Across all datasets</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-success-soft text-success"><i class="ph ph-text-aa"></i></div>
+          <div class="stat-info">
+            <span class="stat-label">Average Name Length</span>
+            <div id="avgLength" class="stat-value">—</div>
+            <div class="stat-meta">Characters per name</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-primary-soft text-primary"><i class="ph ph-trend-up"></i></div>
+          <div class="stat-info" style="width:100%;">
+            <span class="stat-label">Names Added</span>
+            <div id="addedStats" style="display:flex; gap:12px; margin-top:8px; font-size:14px; font-weight:600;">
+              <span class="text-success">F: <span id="addF">0</span></span>
+              <span class="text-primary">M: <span id="addM">0</span></span>
+              <span class="text-warning">U: <span id="addU">0</span></span>
+            </div>
+            <div class="stat-meta">Tracked additions</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-warning-soft text-warning"><i class="ph ph-trend-down"></i></div>
+          <div class="stat-info" style="width:100%;">
+            <span class="stat-label">Names Deleted</span>
+            <div id="deletedStats" style="display:flex; gap:12px; margin-top:8px; font-size:14px; font-weight:600;">
+              <span class="text-success">F: <span id="delF">0</span></span>
+              <span class="text-primary">M: <span id="delM">0</span></span>
+              <span class="text-warning">U: <span id="delU">0</span></span>
+            </div>
+            <div class="stat-meta">Tracked removals</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="analytics-grid">
+        <div class="glass-card chart-card">
+          <div class="tool-card-title"><i class="ph ph-chart-pie-slice"></i> Dataset Composition</div>
+          <div class="chart-container">
+            <canvas id="genderChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card chart-card">
+          <div class="tool-card-title"><i class="ph ph-circles-three"></i> Name Length Clusters</div>
+          <div class="chart-container">
+            <canvas id="bubbleChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card chart-card full-width">
+          <div class="tool-card-title"><i class="ph ph-graph"></i> Dataset Growth History</div>
+          <div class="chart-container">
+            <canvas id="growthChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card chart-card full-width">
+          <div class="tool-card-title"><i class="ph ph-projector-screen-chart"></i> Alphabetical Distribution (Radar)</div>
+          <div class="chart-container" style="max-height: 350px;">
+            <canvas id="alphaChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card chart-card full-width" style="height: auto; min-height: 250px;">
+          <div class="tool-card-title"><i class="ph ph-text-t"></i> Longest Names Compiled</div>
+          <div class="longest-names-grid">
+            <div>
+              <h4 style="margin-bottom:10px; font-size:14px;" class="text-success"><i class="ph ph-gender-female"></i> Female</h4>
+              <ul id="longestFemale" class="name-list"></ul>
+            </div>
+            <div>
+              <h4 style="margin-bottom:10px; font-size:14px;" class="text-primary"><i class="ph ph-gender-male"></i> Male</h4>
+              <ul id="longestMale" class="name-list"></ul>
+            </div>
+            <div>
+              <h4 style="margin-bottom:10px; font-size:14px;" class="text-warning"><i class="ph ph-gender-neuter"></i> Unisex</h4>
+              <ul id="longestUnisex" class="name-list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="./analytics.js?v=2"></script>
+</body>
+
+</html>

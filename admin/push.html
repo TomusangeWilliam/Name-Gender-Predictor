@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NameAdmin | Source Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./assets/phosphor/style.css">
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .source-control-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    @media(max-width: 900px) {
+      .source-control-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .file-list {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+
+    .file-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-family: ui-monospace, monospace;
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .status-badge.M {
+      background: var(--primary-glow);
+      color: var(--primary);
+    }
+
+    .status-badge.A {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .status-badge.D {
+      background: rgba(218, 147, 93, 0.15);
+      color: var(--accent-orange);
+    }
+
+    .status-badge.U {
+      background: rgba(221, 222, 104, 0.15);
+      color: var(--accent-yellow);
+    }
+
+    .commit-input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-light);
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+      font-family: inherit;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+
+    .commit-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .console-output {
+      background: #0f111a;
+      border: 1px solid var(--border-light);
+      padding: 16px;
+      border-radius: var(--radius-md);
+      color: #a5b4fc;
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+
+    .diff-summary {
+      margin-left: auto;
+      display: flex;
+      gap: 6px;
+    }
+
+    .diff-count {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .diff-plus { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .diff-minus { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+    .magic-brush-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .magic-brush-btn:hover {
+      background: var(--primary-glow);
+      color: white;
+    }
+  </style>
+</head>
+
+<body class="dashboard-theme">
+  <!-- Glowing background elements -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <nav class="side-nav" aria-label="Sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div class="brand">
+      <div class="logo-icon">
+        <i class="ph ph-hexagon"></i>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">NameAdmin</div>
+        <div class="brand-subtitle">Enterprise Data Hub</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="./sheet.html" data-title="Sheet">
+        <i class="ph ph-table"></i>
+        <span>Sheet</span>
+      </a>
+      <a class="nav-item" href="./index.html" data-title="Bulk Editor">
+        <i class="ph ph-database"></i>
+        <span>Bulk Editor</span>
+      </a>
+      <a class="nav-item" href="./explorer.html" data-title="Data Explorer">
+        <i class="ph ph-folder"></i>
+        <span>Data Explorer</span>
+      </a>
+      <a class="nav-item" href="./analytics.html" data-title="Analytics">
+        <i class="ph ph-chart-line-up"></i>
+        <span>Analytics</span>
+      </a>
+      <a class="nav-item" href="./nametionalize.html" data-title="Nametionalize">
+        <i class="ph ph-globe-hemisphere-west"></i>
+        <span>Nametionalize</span>
+      </a>
+      <a class="nav-item" href="./paycode.html" data-title="PayCode">
+        <i class="ph ph-code"></i>
+        <span>PayCode</span>
+      </a>
+      <a class="nav-item" href="./teachers.html" data-title="Teachers">
+        <i class="ph ph-chalkboard-teacher"></i>
+        <span>Teachers</span>
+      </a>
+      <a class="nav-item active" href="#" aria-current="page" data-title="PUSH">
+        <i class="ph ph-upload-simple"></i>
+        <span>PUSH</span>
+      </a>
+    </div>
+
+    <div class="nav-footer">
+      <div class="status-indicator">
+        <span class="dot pulse" aria-hidden="true"></span>
+        <span>Secure Local Server</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="workspace">
+    <header class="workspace-header">
+      <div class="header-content">
+        <h1>Source Control</h1>
+        <p>Save your active changes to history and push to GitLab.</p>
+      </div>
+      <div class="header-actions">
+        <div class="status-indicator">
+          <i class="ph ph-git-branch" style="color:#a8b2d1"></i>
+          <span id="branchName">Branch: unknown</span>
+        </div>
+      </div>
+    </header>
+
+    <div id="loading" class="status-msg"><i class="ph ph-spinner-gap pulse" style="animation-duration:1s"></i> Scanning
+      working directory...</div>
+
+    <div id="content" style="display:none;" class="source-control-grid">
+      <div class="master-panel">
+        <div class="glass-card tool-card" style="height: 100%;">
+          <div class="tool-card-title"><i class="ph ph-files"></i> Working Directory Status</div>
+          <p class="tool-desc">The following files have uncommitted changes.</p>
+
+          <div class="file-list" id="fileList">
+            <!-- Populated via JS -->
+          </div>
+
+          <div style="margin-top:24px;">
+            <div class="tool-card-title"><i class="ph ph-check-square-offset"></i> Commit Changes</div>
+            <div style="position: relative;">
+              <input type="text" id="commitMsg" class="commit-input"
+                placeholder="e.g. Update female and male names datasets" />
+              <button id="magicBrushBtn" class="magic-brush-btn" title="✨ Magic Brush (Auto-generate message)" type="button">
+                <i class="ph ph-sparkle"></i>
+              </button>
+            </div>
+            <button id="commitBtn" class="btn btn-primary" type="button">
+              <i class="ph ph-git-commit"></i> Commit Changes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <div class="glass-card tool-card" style="height: 100%;">
+          <div class="tool-card-title"><i class="ph ph-cloud-arrow-up"></i> Push to Remote</div>
+          <p class="tool-desc">Upload local commits to the remote repository on GitLab.</p>
+
+          <div style="margin-top:16px;">
+            <button id="pushBtn" class="btn btn-primary"
+              style="width: 100%; justify-content:center;" type="button">
+              <i class="ph ph-upload-simple"></i> Push to GitLab
+            </button>
+          </div>
+
+          <div style="margin-top:24px;">
+            <div class="tool-card-title" style="font-size: 13px;"><i class="ph ph-terminal"></i> Git Output</div>
+            <div id="gitConsole" class="console-output">Waiting for commands...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="./push.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel Upload Test</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #0f111a;
+      color: #e2e8f0;
+    }
+    .container {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 32px;
+    }
+    h1 {
+      margin-top: 0;
+      color: #a5b2eb;
+    }
+    .upload-area {
+      border: 2px dashed rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      margin: 24px 0;
+      background: rgba(99, 102, 241, 0.05);
+    }
+    button {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #4f46e5;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    th {
+      background: rgba(99, 102, 241, 0.1);
+      color: #a5b2eb;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+    .success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+    #fileInput {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Excel Upload Feature Test</h1>
+    <p>Test the Excel file parsing functionality for PayCode Hub</p>
+    
+    <div class="upload-area">
+      <input type="file" id="fileInput" accept=".xlsx,.xls">
+      <button onclick="document.getElementById('fileInput').click()">
+        Choose Excel File
+      </button>
+      <p style="margin-top: 16px; color: #94a3b8; font-size: 14px;">
+        Supported formats: .xlsx, .xls
+      </p>
+    </div>
+
+    <div id="status"></div>
+    <div id="preview"></div>
+  </div>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      console.log('Selected file:', file.name, file.type, file.size);
+
+      // Validate file type
+      const validTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel'
+      ];
+      
+      if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+        showError('Invalid file format. Please upload an Excel file (.xlsx or .xls)');
+        return;
+      }
+
+      parseExcelFile(file);
+    }
+
+    function parseExcelFile(file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          console.log('File loaded, starting parse...');
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+
+          console.log('Workbook sheets:', workbook.SheetNames);
+          
+          // Get the first sheet
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+
+          console.log('Processing sheet:', firstSheetName);
+
+          // Convert to JSON with headers
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          console.log('Total rows (including header):', jsonData.length);
+
+          if (jsonData.length === 0) {
+            showError('Excel file is empty');
+            return;
+          }
+
+          // Display raw data for debugging
+          console.log('Raw data (first 3 rows):', jsonData.slice(0, 3));
+
+          // Extract column indices by matching header names
+          const headers = jsonData[0].map(h => String(h).trim().toLowerCase());
+          console.log('Headers:', headers);
+          
+          // Map possible column name variations
+          const firstNameIdx = findColumnIndex(headers, ['first name', 'firstname', 'first_name', 'fname']);
+          const lastNameIdx = findColumnIndex(headers, ['last name', 'lastname', 'last_name', 'lname', 'surname']);
+          const middleNameIdx = findColumnIndex(headers, ['middle name', 'middlename', 'middle_name', 'mname', 'middle initial']);
+          const payCodeIdx = findColumnIndex(headers, ['school pay code', 'paycode', 'pay_code', 'pay code', 'code']);
+
+          console.log('Column indices:', {
+            firstName: firstNameIdx,
+            lastName: lastNameIdx,
+            middleName: middleNameIdx,
+            payCode: payCodeIdx
+          });
+
+          // Validate that we found at least first and last name columns
+          if (firstNameIdx === -1 || lastNameIdx === -1) {
+            showError('Could not find required columns (First Name, Last Name). Headers found: ' + headers.join(', '));
+            return;
+          }
+
+          // Extract data rows
+          const extractedData = [];
+          let skippedRows = 0;
+
+          for (let i = 1; i < jsonData.length; i++) {
+            const row = jsonData[i];
+            
+            if (!row || row.every(cell => !cell || String(cell).trim() === '')) {
+              continue;
+            }
+
+            const firstName = getValueAtIndex(row, firstNameIdx);
+            const lastName = getValueAtIndex(row, lastNameIdx);
+            const middleName = middleNameIdx !== -1 ? getValueAtIndex(row, middleNameIdx) : '';
+            const payCode = payCodeIdx !== -1 ? getValueAtIndex(row, payCodeIdx) : '';
+
+            if (firstName || lastName) {
+              extractedData.push({
+                firstName,
+                middleName,
+                lastName,
+                payCode
+              });
+            } else {
+              skippedRows++;
+            }
+          }
+
+          console.log('Extracted rows:', extractedData.length, 'Skipped:', skippedRows);
+
+          if (extractedData.length === 0) {
+            showError('No valid data found in the Excel file');
+            return;
+          }
+
+          // Display success and preview
+          showSuccess(`Successfully parsed ${extractedData.length} rows (${skippedRows} skipped)`);
+          displayPreview(extractedData);
+
+        } catch (error) {
+          console.error('Error parsing Excel file:', error);
+          showError('Failed to parse Excel file: ' + error.message);
+        }
+      };
+
+      reader.onerror = () => {
+        showError('Failed to read the file');
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function findColumnIndex(headers, possibleNames) {
+      for (let i = 0; i < headers.length; i++) {
+        const header = headers[i];
+        if (possibleNames.some(name => header === name)) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    function getValueAtIndex(row, index) {
+      if (index === -1 || index >= row.length) return '';
+      const value = row[index];
+      return value ? String(value).trim() : '';
+    }
+
+    function displayPreview(data) {
+      let html = '<h3>Preview (First 10 Rows)</h3>';
+      html += '<table>';
+      html += '<thead><tr>';
+      html += '<th>#</th>';
+      html += '<th>First Name</th>';
+      html += '<th>Middle Name</th>';
+      html += '<th>Last Name</th>';
+      html += '<th>Pay Code</th>';
+      html += '</tr></thead><tbody>';
+
+      const previewLimit = Math.min(data.length, 10);
+      for (let i = 0; i < previewLimit; i++) {
+        const row = data[i];
+        html += '<tr>';
+        html += `<td>${i + 1}</td>`;
+        html += `<td>${row.firstName || '-'}</td>`;
+        html += `<td>${row.middleName || '-'}</td>`;
+        html += `<td>${row.lastName || '-'}</td>`;
+        html += `<td>${row.payCode || '-'}</td>`;
+        html += '</tr>';
+      }
+
+      html += '</tbody></table>';
+      
+      if (data.length > 10) {
+        html += `<p style="color: #94a3b8; margin-top: 12px;">... and ${data.length - 10} more rows</p>`;
+      }
+
+      document.getElementById('preview').innerHTML = html;
+    }
+
+    function showError(message) {
+      document.getElementById('status').innerHTML = `<div class="error">❌ ${message}</div>`;
+      document.getElementById('preview').innerHTML = '';
+    }
+
+    function showSuccess(message) {
+      document.getElementById('status').innerHTML = `<div class="success">✅ ${message}</div>`;
+    }
+  </script>
+</body>
+</html>

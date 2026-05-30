@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NameAdmin | Nametionalize</title>
+  <meta name="description"
+    content="Predict the likely nationality of any name using live probability data from nationalize.io." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./assets/phosphor/style.css">
+  <link rel="stylesheet" href="./styles.css" />
+
+  <style>
+    /* ── Page-specific layout ─────────────────────────────── */
+    .nt-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── Search panel ─────────────────────────────────────── */
+    .nt-search-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .nt-search-box {
+      padding: 28px 28px 24px;
+    }
+
+    .nt-search-box h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nt-search-box h2 i {
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    .nt-search-box p.desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.55;
+    }
+
+    .nt-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nt-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 13px 18px;
+      color: var(--text-main);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .nt-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(165, 178, 235, 0.2);
+    }
+
+    .nt-input::placeholder {
+      color: rgba(148, 163, 184, 0.45);
+    }
+
+    .nt-mode-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .nt-tab {
+      flex: 1;
+      padding: 9px 0;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .nt-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+
+    .nt-tab.active {
+      background: rgba(165, 178, 235, 0.15);
+      border-color: rgba(165, 178, 235, 0.4);
+      color: var(--primary);
+    }
+
+    /* Bulk textarea */
+    .nt-bulk-area {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nt-bulk-area.visible {
+      display: flex;
+    }
+
+    .nt-bulk-textarea {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-family: ui-monospace, monospace;
+      line-height: 1.6;
+      outline: none;
+      resize: vertical;
+      min-height: 140px;
+      transition: border-color 0.2s;
+    }
+
+    .nt-bulk-textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .nt-bulk-textarea::placeholder {
+      color: rgba(148, 163, 184, 0.4);
+    }
+
+    /* ── Results ──────────────────────────────────────────── */
+    .nt-results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .nt-results-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .nt-count-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(165, 178, 235, 0.15);
+      color: var(--primary);
+    }
+
+    .nt-results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Single result card */
+    .nt-result-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .nt-result-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .nt-result-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .nt-result-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .nt-country-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .nt-country-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nt-flag {
+      width: 28px;
+      height: 20px;
+      border-radius: 3px;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
+    }
+
+    .nt-country-name {
+      font-size: 13px;
+      font-weight: 600;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nt-prob-bar-wrap {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+      min-width: 60px;
+    }
+
+    .nt-prob-bar {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nt-prob-pct {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 38px;
+      text-align: right;
+    }
+
+    /* No-result state */
+    .nt-no-result {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .nt-no-result i {
+      font-size: 36px;
+      margin-bottom: 10px;
+      display: block;
+      opacity: 0.4;
+    }
+
+    /* Error card */
+    .nt-error-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: var(--error-bg);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      border-radius: var(--radius-md);
+      color: #f87171;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* ── Side panel ───────────────────────────────────────── */
+    .nt-side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+    }
+
+    .nt-info-card {
+      padding: 22px 24px;
+    }
+
+    .nt-info-card .tool-card-title {
+      margin-bottom: 16px;
+    }
+
+    .nt-info-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nt-info-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .nt-info-list li i {
+      font-size: 16px;
+      color: var(--primary);
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    /* History */
+    .nt-history-card {
+      padding: 22px 24px;
+    }
+
+    .nt-history-empty {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    .nt-history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .nt-history-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.04);
+      cursor: pointer;
+      transition: background 0.15s;
+      border: none;
+      font-family: inherit;
+      text-align: left;
+      width: 100%;
+    }
+
+    .nt-history-item:hover {
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .nt-history-name {
+      font-size: 13px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .nt-history-top {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nt-history-top .nt-flag {
+      width: 16px;
+      height: 11px;
+    }
+
+    /* Loading spinner */
+    @keyframes nt-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .nt-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(165, 178, 235, 0.3);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: nt-spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+
+    /* Gradient bar colours */
+    .bar-top { background: linear-gradient(90deg, #a5b2eb, #8e9de0); }
+    .bar-2   { background: linear-gradient(90deg, #6ee7b7, #10b981); }
+    .bar-3   { background: linear-gradient(90deg, #ddde68, #c6a700); }
+    .bar-4   { background: linear-gradient(90deg, #da935d, #c07340); }
+    .bar-5   { background: linear-gradient(90deg, #c084fc, #9333ea); }
+
+    @media (max-width: 1024px) {
+      .nt-layout { grid-template-columns: 1fr; }
+      .nt-side-panel { position: static; }
+    }
+  </style>
+</head>
+
+<body class="dashboard-theme">
+  <!-- Glowing background blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- ── Sidebar ── -->
+  <nav class="side-nav" aria-label="Sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div class="brand">
+      <div class="logo-icon">
+        <i class="ph ph-hexagon"></i>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">NameAdmin</div>
+        <div class="brand-subtitle">Enterprise Data Hub</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="./sheet.html" data-title="Sheet">
+        <i class="ph ph-table"></i>
+        <span>Sheet</span>
+      </a>
+      <a class="nav-item" href="./index.html" data-title="Bulk Editor">
+        <i class="ph ph-database"></i>
+        <span>Bulk Editor</span>
+      </a>
+      <a class="nav-item" href="./explorer.html" data-title="Data Explorer">
+        <i class="ph ph-folder"></i>
+        <span>Data Explorer</span>
+      </a>
+      <a class="nav-item" href="./analytics.html" data-title="Analytics">
+        <i class="ph ph-chart-line-up"></i>
+        <span>Analytics</span>
+      </a>
+      <a class="nav-item active" href="#" aria-current="page" data-title="Nametionalize">
+        <i class="ph ph-globe-hemisphere-west"></i>
+        <span>Nametionalize</span>
+      </a>
+      <a class="nav-item" href="./paycode.html" data-title="PayCode">
+        <i class="ph ph-code"></i>
+        <span>PayCode</span>
+      </a>
+      <a class="nav-item" href="./teachers.html" data-title="Teachers">
+        <i class="ph ph-chalkboard-teacher"></i>
+        <span>Teachers</span>
+      </a>
+      <a class="nav-item" href="./push.html" data-title="PUSH">
+        <i class="ph ph-upload-simple"></i>
+        <span>PUSH</span>
+      </a>
+    </div>
+
+    <div class="nav-footer">
+      <div class="status-indicator">
+        <span class="dot pulse" aria-hidden="true"></span>
+        <span>Secure Local Server</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main workspace ── -->
+  <main class="workspace">
+    <header class="workspace-header">
+      <div class="header-content">
+        <h1>Nametionalize</h1>
+        <p>Predict the likely nationality of any name using live probability data.</p>
+      </div>
+      <div class="header-actions">
+        <button id="clearHistoryBtn" class="btn btn-ghost" type="button">
+          <i class="ph ph-clock-counter-clockwise"></i> Clear History
+        </button>
+      </div>
+    </header>
+
+    <div class="nt-layout">
+
+      <!-- ── Left: search + results ── -->
+      <div class="nt-search-panel">
+
+        <!-- Search card -->
+        <div class="glass-card nt-search-box">
+          <h2><i class="ph ph-globe-hemisphere-west"></i> Nationality Predictor</h2>
+          <p class="desc">
+            Enter one or more names to get a nationality breakdown powered by
+            <strong>nationalize.io</strong>. Results include country flags, country
+            names, and probability scores.
+          </p>
+
+          <!-- Mode tabs -->
+          <div class="nt-mode-tabs" role="tablist">
+            <button id="tabSingle" class="nt-tab active" role="tab" aria-selected="true" type="button">
+              <i class="ph ph-user"></i> Single Name
+            </button>
+            <button id="tabBulk" class="nt-tab" role="tab" aria-selected="false" type="button">
+              <i class="ph ph-list-bullets"></i> Bulk Names
+            </button>
+          </div>
+
+          <!-- Single input -->
+          <div id="singleMode">
+            <div class="nt-input-row">
+              <input id="singleInput" class="nt-input" type="text"
+                placeholder="e.g. James, Fatima, Hiroshi…"
+                autocomplete="off" spellcheck="false"
+                aria-label="Enter a name to predict nationality" />
+              <button id="singleBtn" class="btn btn-primary" type="button">
+                <i class="ph ph-magnifying-glass"></i> Predict
+              </button>
+            </div>
+          </div>
+
+          <!-- Bulk input -->
+          <div id="bulkMode" class="nt-bulk-area">
+            <textarea id="bulkInput" class="nt-bulk-textarea"
+              placeholder="One name per line, or comma-separated&#10;&#10;e.g.&#10;Aacha&#10;John&#10;Fatima&#10;Hiroshi"
+              spellcheck="false"
+              aria-label="Enter multiple names to predict nationalities"></textarea>
+            <button id="bulkBtn" class="btn btn-primary" type="button" style="align-self:flex-end;">
+              <i class="ph ph-lightning"></i> Predict All
+            </button>
+          </div>
+        </div>
+
+        <!-- Results area -->
+        <div id="resultsSection" style="display:none;">
+          <div class="nt-results-header">
+            <h3 id="resultsTitle">Results</h3>
+            <span id="resultsCount" class="nt-count-badge">0</span>
+          </div>
+          <div id="resultsList" class="nt-results-list"></div>
+        </div>
+
+        <!-- Initial empty state -->
+        <div id="emptyState" class="glass-card nt-no-result">
+          <i class="ph ph-globe-stand"></i>
+          Enter a name above and hit <strong>Predict</strong> to see nationality probabilities.
+        </div>
+
+      </div>
+
+      <!-- ── Right: info + history ── -->
+      <aside class="nt-side-panel">
+
+        <!-- How it works -->
+        <div class="glass-card nt-info-card highlight-card">
+          <div class="tool-card-title">
+            <i class="ph ph-info"></i> How It Works
+          </div>
+          <ul class="nt-info-list">
+            <li>
+              <i class="ph ph-globe"></i>
+              <span>Queries the free <strong>nationalize.io</strong> REST API in real-time — no API key required.</span>
+            </li>
+            <li>
+              <i class="ph ph-flag"></i>
+              <span>Flags are served from <strong>flagcdn.com</strong> using ISO&nbsp;3166-1 alpha-2 country codes.</span>
+            </li>
+            <li>
+              <i class="ph ph-percent"></i>
+              <span>Probabilities are sorted from highest to lowest. The top result is the most likely nationality.</span>
+            </li>
+            <li>
+              <i class="ph ph-lightning"></i>
+              <span>Bulk mode sends one API request per name. Rate-limit: ~1 000 names / day on the free tier.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Recent lookups -->
+        <div class="glass-card nt-history-card">
+          <div class="tool-card-title">
+            <i class="ph ph-clock-clockwise"></i> Recent Lookups
+          </div>
+          <div id="historyList">
+            <p class="nt-history-empty">No lookups yet.</p>
+          </div>
+        </div>
+
+        <!-- API info -->
+        <div class="glass-card tool-card">
+          <div class="tool-card-title">
+            <i class="ph ph-cable-car"></i> API Endpoints Used
+          </div>
+          <div class="api-endpoints">
+            <div class="info-box">
+              <span class="method get">GET</span>
+              <code>api.nationalize.io/?name=:name</code>
+            </div>
+            <div class="info-box">
+              <span class="method get">GET</span>
+              <code>flagcdn.com/w40/:cc.png</code>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    /* ============================================================
+       Nametionalize — client script
+       ============================================================ */
+
+    const NATIONALIZE_API = 'https://api.nationalize.io/';
+    const FLAG_URL = (cc) => `https://flagcdn.com/w40/${cc.toLowerCase()}.png`;
+    const BAR_CLASSES = ['bar-top', 'bar-2', 'bar-3', 'bar-4', 'bar-5'];
+
+    // Country names via Intl.DisplayNames (no extra dependency)
+    const regionNames = (() => {
+      try { return new Intl.DisplayNames(['en'], { type: 'region' }); }
+      catch { return null; }
+    })();
+
+    function countryName(cc) {
+      try { return regionNames ? regionNames.of(cc.toUpperCase()) : cc; }
+      catch { return cc; }
+    }
+
+    // ── History ──────────────────────────────────────────────────
+    const MAX_HISTORY = 12;
+    let history = [];
+
+    function addToHistory(name, topCountry) {
+      history = history.filter(h => h.name.toLowerCase() !== name.toLowerCase());
+      history.unshift({ name, topCountry });
+      if (history.length > MAX_HISTORY) history.pop();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('historyList');
+      if (!history.length) {
+        container.innerHTML = '<p class="nt-history-empty">No lookups yet.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      const list = document.createElement('div');
+      list.className = 'nt-history-list';
+      history.forEach(({ name, topCountry }) => {
+        const btn = document.createElement('button');
+        btn.className = 'nt-history-item';
+        btn.innerHTML = `
+          <span class="nt-history-name">${escHtml(name)}</span>
+          ${topCountry ? `
+          <span class="nt-history-top">
+            <img class="nt-flag" src="${FLAG_URL(topCountry.country_id)}"
+                 alt="${escHtml(topCountry.country_id)}" onerror="this.style.display='none'" />
+            ${Math.round(topCountry.probability * 100)}%
+          </span>` : ''}
+        `;
+        btn.addEventListener('click', () => {
+          setMode('single');
+          document.getElementById('singleInput').value = name;
+          runSingle(name);
+        });
+        list.appendChild(btn);
+      });
+      container.appendChild(list);
+    }
+
+    // ── Modes ────────────────────────────────────────────────────
+    const tabSingle = document.getElementById('tabSingle');
+    const tabBulk   = document.getElementById('tabBulk');
+    const singleMode = document.getElementById('singleMode');
+    const bulkMode   = document.getElementById('bulkMode');
+
+    function setMode(mode) {
+      const isSingle = mode === 'single';
+      tabSingle.classList.toggle('active', isSingle);
+      tabBulk.classList.toggle('active', !isSingle);
+      tabSingle.setAttribute('aria-selected', isSingle);
+      tabBulk.setAttribute('aria-selected', !isSingle);
+      singleMode.style.display = isSingle ? '' : 'none';
+      bulkMode.classList.toggle('visible', !isSingle);
+    }
+
+    tabSingle.addEventListener('click', () => setMode('single'));
+    tabBulk.addEventListener('click',   () => setMode('bulk'));
+
+    // ── API ──────────────────────────────────────────────────────
+    async function lookupName(name) {
+      const url = `${NATIONALIZE_API}?name=${encodeURIComponent(name.trim())}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      return res.json();
+    }
+
+    // ── Rendering helpers ─────────────────────────────────────────
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function buildResultCard(data) {
+      const countries = (data.country || []).slice(0, 5);
+      const name = data.name || '—';
+
+      const card = document.createElement('div');
+      card.className = 'nt-result-card';
+
+      let countriesHtml = '';
+      if (!countries.length) {
+        countriesHtml = `<p class="nt-no-result" style="padding:8px 0; font-size:13px;">
+          No nationality data found for this name.</p>`;
+      } else {
+        countriesHtml = '<div class="nt-country-list">';
+        countries.forEach((c, i) => {
+          const pct = Math.round(c.probability * 100);
+          const cname = countryName(c.country_id);
+          countriesHtml += `
+            <div class="nt-country-row">
+              <img class="nt-flag"
+                   src="${FLAG_URL(c.country_id)}"
+                   alt="${escHtml(c.country_id)}"
+                   onerror="this.style.display='none'" />
+              <span class="nt-country-name">${escHtml(cname)}</span>
+              <div class="nt-prob-bar-wrap">
+                <div class="nt-prob-bar ${BAR_CLASSES[i] || 'bar-5'}"
+                     style="width:0%"
+                     data-target="${c.probability * 100}"></div>
+              </div>
+              <span class="nt-prob-pct">${pct}%</span>
+            </div>`;
+        });
+        countriesHtml += '</div>';
+      }
+
+      const totalCount = data.count ?? '—';
+      card.innerHTML = `
+        <div class="nt-result-name">${escHtml(name)}</div>
+        <div class="nt-result-sub">
+          <i class="ph ph-database" style="font-size:12px;"></i>
+          Based on ${Number(totalCount).toLocaleString()} records
+        </div>
+        ${countriesHtml}
+      `;
+
+      // Animate bars after DOM insertion
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          card.querySelectorAll('.nt-prob-bar[data-target]').forEach(bar => {
+            bar.style.width = parseFloat(bar.dataset.target) + '%';
+          });
+        });
+      });
+
+      return card;
+    }
+
+    function showError(message) {
+      const div = document.createElement('div');
+      div.className = 'nt-error-card';
+      div.innerHTML = `<i class="ph ph-warning"></i> ${escHtml(message)}`;
+      return div;
+    }
+
+    // ── Single lookup ─────────────────────────────────────────────
+    async function runSingle(nameRaw) {
+      const name = (nameRaw || '').trim();
+      if (!name) return;
+
+      showResults(true);
+      document.getElementById('resultsTitle').textContent = `Results for "${name}"`;
+      document.getElementById('resultsCount').textContent = '…';
+
+      const list = document.getElementById('resultsList');
+      list.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:16px 0;color:var(--text-muted);font-size:14px;">
+        <span class="nt-spinner"></span> Looking up <strong>${escHtml(name)}</strong>…</div>`;
+
+      try {
+        const data = await lookupName(name);
+        list.innerHTML = '';
+        list.appendChild(buildResultCard(data));
+        document.getElementById('resultsCount').textContent = (data.country || []).length;
+        if (data.country && data.country.length) addToHistory(name, data.country[0]);
+      } catch (err) {
+        list.innerHTML = '';
+        list.appendChild(showError(err.message));
+        document.getElementById('resultsCount').textContent = '!';
+      }
+    }
+
+    // ── Bulk lookup ───────────────────────────────────────────────
+    async function runBulk(rawText) {
+      const names = rawText
+        .split(/[\r\n,;]+/)
+        .map(s => s.trim())
+        .filter(Boolean)
+        .filter((v, i, a) => a.findIndex(x => x.toLowerCase() === v.toLowerCase()) === i)
+        .slice(0, 50); // cap at 50 to be polite to the free API
+
+      if (!names.length) return;
+
+      showResults(true);
+      document.getElementById('resultsTitle').textContent = `Bulk Results`;
+      document.getElementById('resultsCount').textContent = '…';
+
+      const list = document.getElementById('resultsList');
+      list.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:16px 0;color:var(--text-muted);font-size:14px;">
+        <span class="nt-spinner"></span> Looking up <strong>${names.length}</strong> name${names.length !== 1 ? 's' : ''}…</div>`;
+
+      const results = [];
+      const errors  = [];
+
+      for (const name of names) {
+        try {
+          const data = await lookupName(name);
+          results.push(data);
+          if (data.country && data.country.length) addToHistory(name, data.country[0]);
+        } catch (err) {
+          errors.push({ name, message: err.message });
+        }
+        await new Promise(r => setTimeout(r, 60)); // gentle rate-limiting
+      }
+
+      list.innerHTML = '';
+      results.forEach(data => list.appendChild(buildResultCard(data)));
+      errors.forEach(({ name, message }) => {
+        const errBlock = document.createElement('div');
+        errBlock.innerHTML = `<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">${escHtml(name)}</div>`;
+        errBlock.appendChild(showError(message));
+        list.appendChild(errBlock);
+      });
+      document.getElementById('resultsCount').textContent = results.length + errors.length;
+    }
+
+    function showResults(show) {
+      document.getElementById('resultsSection').style.display = show ? '' : 'none';
+      document.getElementById('emptyState').style.display     = show ? 'none' : '';
+    }
+
+    // ── Event wiring ──────────────────────────────────────────────
+    document.getElementById('singleBtn').addEventListener('click', () => {
+      runSingle(document.getElementById('singleInput').value);
+    });
+
+    document.getElementById('singleInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') runSingle(e.target.value);
+    });
+
+    document.getElementById('bulkBtn').addEventListener('click', () => {
+      runBulk(document.getElementById('bulkInput').value);
+    });
+
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      history = [];
+      renderHistory();
+    });
+
+    // Init
+    renderHistory();
+    setMode('single');
+
+    // Sidebar Toggle Functionality
+    const sidebarToggleEl = document.getElementById('sidebarToggle');
+    if (sidebarToggleEl) {
+      const sideNav = document.querySelector('.side-nav');
+      
+      // Check localStorage for saved state
+      const savedState = localStorage.getItem('sidebarCollapsed');
+      if (savedState === 'true') {
+        sideNav.classList.add('collapsed');
+      }
+      
+      sidebarToggleEl.addEventListener('click', () => {
+        sideNav.classList.toggle('collapsed');
+        const isCollapsed = sideNav.classList.contains('collapsed');
+        localStorage.setItem('sidebarCollapsed', isCollapsed);
+      });
+    }
+  </script>
+</body>
+
+</html>

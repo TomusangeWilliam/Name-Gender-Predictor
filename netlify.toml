@@ -1,0 +1,42 @@
+# Netlify config placed at repository root so Netlify detects it.
+[build]
+  command = "echo 'No build required'"
+  publish = "admin"
+  functions = "netlify/functions"
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api?path=:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/female-names.json"
+  to = "/.netlify/functions/api?path=female-names.json"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/male-names.json"
+  to = "/.netlify/functions/api?path=male-names.json"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/unisex-names.json"
+  to = "/.netlify/functions/api?path=unisex-names.json"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/"
+  to = "/admin/"
+  status = 302
+  force = true
+[dev]
+  command = "npm start"
+
+# Notes:
+# - Netlify reads netlify.toml from the repository root. Placing it inside
+#   a `netlify/` directory will be ignored when deploying from Git.
+# - If you connect the repo in the Netlify UI, the `publish` directory will
+#   default to `admin` as configured above.
